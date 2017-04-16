@@ -1,0 +1,160 @@
+1)ViewController get  initialized (from storyboard) init(coder: aDecoder)
+View controller are usually created from storyboards. When this is the case, init(coder:) is the initializer that gets called and you have to override.
+
+What is inti(coder:) ===>When you drag an object onto a storyboard and configure it, Interface Builder serializes the state of that object on to disk, then deserialize it when the storyboard appears on screen. You need to tell Interface Builder how to do those. At the very least, if you don't add any new properties to your subclass, you can simply ask the superclass to do the packing and unpacking for you, hence the super.init(coder: aDecoder) call
+
+What things can be done ———>  During the initialisation phase of a view controller, you usually allocate the resources that the view controller will need during its lifetime. These include model objects or other auxiliary controllers, like network controllers. Previous view controllers might also pass these objects to the current one, so you do not always need to instantiate them in every view controller.
+
+What things cannotBe done ===> Do not try to access view of the view controller in this method because view won’t be instantiated at this point of time.
+
+1a)If ViewController is initialised from separate nib file: init(nibName:bundle:) method is called.
+ 
+2)AwakeFromNib
+What is awake from nib ====> During the instantiation process, each object in the archive is unarchived and then initialized with the method befitting its type. Objects that conform to the NSCoding protocol (including all subclasses of UIView and UIViewController) are initialized using their initWithCoder: method. All objects that do not conform to the NSCoding protocol are initialized using their init method. After all objects have been instantiated and initialized, the nib-loading code reestablishes the outlet and action connections for all of those objects. It then calls the awakeFromNib method of the objects 
+
+What things can be done ———> You implement awakeFromNib for objects that require additional set up that cannot be done at design time. For example, you might use this method to customize the default configuration of any controls to match user preferences or the values in other controls.
+
+3)loadView()
+What is loadView() ====>You should never call this method directly. The view controller calls this method when its view property is requested but is currently nil. This method loads or creates a view and assigns it to the view property.
+If the view controller has an associated nib file, this method loads the view from the nib file. A view controller has an associated nib file if the nibName property returns a non-nil value, which occurs if the view controller was instantiated from a storyboard, if you explicitly assigned it a nib file using the init(nibName:bundle:) method, or if iOS finds a nib file in the app bundle with a name based on the view controller's class name. If the view controller does not have an associated nib file, this method creates a plain UIView object instead.
+If you use Interface Builder to create your views and initialize the view controller, you must not override this method.
+You can override this method in order to create your views manually. If you choose to do so, assign the root view of your view hierarchy to the view property. The views you create should be unique instances and should not be shared with any other view controller object. 
+Your custom implementation of this method should not call super.
+
+What things can be done ====> The method load or create a view and assigns it to the view property.
+what things cannot be done ======>  do not perform any geometry changes,If you use Interface Builder to create your views and initialize the view controller, you must not override this method.
+
+4)SeguePreparationHappens
+
+5)ViewDidLoad
+
+What is viewDidLoad ====> This method is called after the view controller has loaded its view hierarchy into memory. This method is called regardless of whether the view hierarchy was loaded from a nib file or created programmatically in the loadView() method. You usually override this method to perform additional initialization on views that were loaded from nib files.
+viewDidLoad is called once in the life time of a viewController.
+
+what things can be done ======> view can be further customised / additional initialization can be done.
+
+what things cannot be done ======> do not perform any geometry changes.
+
+
+6)viewWillAppear 
+This method is called before the view controller's view is about to be added to a view hierarchy and before any animations are configured for showing the view. You can override this method to perform custom tasks associated with displaying the view. For example, you might use this method to change the orientation or style of the status bar to coordinate with the orientation or style of the view being presented. If you override this method, you must call super at some point in your implementation.
+viewWillAppear will be called when navigate back to previous view controller
+
+NOTE:If a view controller is presented by a view controller inside of a popover, this method is not invoked on the presenting view controller after the presented controller is dismissed.
+
+what things can be done ======> you might use this method to change the orientation or style of the status bar to coordinate with the orientation or style of the view being presented(geometry changes can be done according to the orientation in this method)
+Ca nee used to update view or view related data when user navigates back to previous view controller.
+what things cannot be done =====> viewWillAppear will be called when navigate back to previous view controller so initialisation and customisation should be done carefully.
+
+
+7)viewDidAppear
+What is viewDidAppear ====> Notifies the view controller that its view was added to a view hierarchy.
+NOTE:If a view controller is presented by a view controller inside of a popover, this method is not invoked on the presenting view controller after the presented controller is dismissed.
+what things can be done ======> You can override this method to perform additional tasks associated with presenting the view.
+what things cannot be done =====> viewDidAppear will be called when navigate back to previous view controller so initialisation and customisation should be done carefully.
+
+
+8)viewWillLayoutSubViews
+
+Called to notify the view controller that its view is about to layout its subviews.
+When a view's bounds change, the view adjusts the position of its subviews. Your view controller can override this method to make changes before the view lays out its subviews. The default implementation of this method does nothing.
+
+ 9)viewDidLayoutSubviews
+Called to notify the view controller that its view has just laid out its subviews.
+When the bounds change for a view controller's view, the view adjusts the positions of its subviews and then the system calls this method. However, this method being called does not indicate that the individual layouts of the view's subviews have been adjusted. Each subview is responsible for adjusting its own layout.
+
+
+10)viewWillDisAppear
+
+This method is called in response to a view being removed from a view hierarchy. This method is called before the view is actually removed and before any animations are configured.
+Subclasses can override this method and use it to commit editing changes, resign the first responder status of the view, or perform other relevant tasks. For example, you might use this method to revert changes to the orientation or style of the status bar that were made in the viewDidDisappear(_:) method when the view was first presented. If you override this method, you must call super at some point in your implementation.
+Example:stopping something such as audio or video
+
+
+11)viewDidDisappear
+Notifies the view controller that its view was removed from a view hierarchy.
+
+You can override this method to perform additional tasks associated with dismissing or hiding the view. If you override this method, you must call super at some point in your implementation.
+
+12)deInit()
+Like every other object, before a view controller is removed from memory, it gets deinitialized. You usually override deinit() to clean resources that the view controller has allocated that are not freed by ARC. You can also stop tasks you did not stop in the previous method because you wanted to keep them in the background. Beware that a view controller going out of the screen does not mean that it will be deallocated afterwards. Many containers keep view controllers in memory. For example, as you go deeper in a navigation controller, all the previous view controllers stay in memory. A navigation controller releases view controllers only when navigating back up the hierarchy. For this reason, you have to keep in mind that a view controller that is not on the screen still works normally and receives notifications. Sometimes this is desiderable, other times it isn’t, so you need to keep this in mind while developing your app.
+
+13)didRecieveMemoryWarning
+Sent to the view controller when the app receives a memory warning.
+Your app never calls this method directly. Instead, this method is called when the system determines that the amount of available memory is low.
+You can override this method to release any additional memory used by your view controller. If you do, your implementation of this method must call the super implementation at some point.
+If low memory happens and your application is using lots of memory,OS will kill your application.
+
+
+**********************************************************************************************************************************
+STORYBOARD LIFECYCLE:
+**********************************************************************************************************************************
+Life Cycle when initial viewController is loaded from storyboard:
+1 step of life cycle===> FirstViewController.init(coder:) 
+2 step of life cycle===> FirstViewController.awakeFromNib() 
+3 step of life cycle===> FirstViewController.viewDidLoad() 
+4 step of life cycle===> FirstViewController.viewWillAppear 
+5 step of life cycle===> FirstViewController.viewWillLayoutSubviews()
+6 step of life cycle===> FirstViewController.viewDidLayoutSubviews()
+7 step of life cycle===> FirstViewController.viewDidAppear 
+
+Life cycle of view controller when we move from one controller to another controller using segues:
+1 step of life cycle===> SecondViewController.init(coder:) 
+2 step of life cycle===> SecondViewController.awakeFromNib() 
+3 step of life cycle===> FirstViewController.prepare(for:sender:) 
+4 step of life cycle===> FirstViewController.viewWillDisappear 
+5 step of life cycle===> SecondViewController.viewDidLoad() 
+6 step of life cycle===> SecondViewController.viewWillAppear 
+7 step of life cycle===> SecondViewController.viewWillLayoutSubviews() 
+8 step of life cycle===> SecondViewController.viewDidLayoutSubviews() 
+9 step of life cycle===> FirstViewController.viewDidDisappear 
+10 step of life cycle===> SecondViewController.viewDidAppear 
+
+When we come back to FirstViewController:
+1 step of life cycle===> SecondViewController.viewWillDisappear 
+2 step of life cycle===> FirstViewController.viewWillAppear 
+3 step of life cycle===> SecondViewController.viewDidDisappear 
+4 step of life cycle===> FirstViewController.viewDidAppear 
+5 step of life cycle===> SecondViewController.deinit 
+
+
+**********************************************************************************************************************************
+XIB LIFECYCLE:
+**********************************************************************************************************************************
+Life Cycle when initial viewController is loaded from XIB:
+1 step of life cycle===> XIBFirstViewController.init(nibName:bundle:) 
+2 step of life cycle===> XIBFirstViewController.viewDidLoad() 
+3 step of life cycle===> XIBFirstViewController.viewWillAppear 
+4 step of life cycle===> XIBFirstViewController.viewWillLayoutSubviews()
+5 step of life cycle===> XIBFirstViewController.viewDidLayoutSubviews() 
+6 step of life cycle===> XIBFirstViewController.viewDidAppear 
+
+Life cycle of view controller when we move from one controller to another controller using XIB:
+1 step of life cycle===> XIBSecondViewController.init(nibName:bundle:) 
+2 step of life cycle===> XIBFirstViewController.viewWillDisappear 
+3 step of life cycle===> XIBSecondViewController.viewDidLoad() 
+4 step of life cycle===> XIBSecondViewController.viewWillAppear 
+5 step of life cycle===> XIBSecondViewController.viewWillLayoutSubviews() 
+6 step of life cycle===> XIBSecondViewController.viewDidLayoutSubviews() 
+7 step of life cycle===> XIBFirstViewController.viewDidDisappear 
+8 step of life cycle===> XIBSecondViewController.viewDidAppear 
+
+When we come back to FirstViewController:
+1 step of life cycle===> XIBSecondViewController.viewWillDisappear 
+2 step of life cycle===> XIBFirstViewController.viewWillAppear 
+3 step of life cycle===> XIBSecondViewController.viewDidDisappear 
+4 step of life cycle===> XIBFirstViewController.viewDidAppear 
+5 step of life cycle===> XIBSecondViewController.deinit 
+
+
+
+
+
+
+
+
+
+
+
+
+
